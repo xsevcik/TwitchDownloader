@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TwitchDownloaderMAUI.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TwitchDownloaderMAUI"
+    Shell.FlyoutBehavior="Disabled"
+    Title="TwitchDownloader (MAUI Beta)">
+
+    <TabBar>
+        <Tab Title="VOD Downloader">
+            <ShellContent Title="VOD Downloader" ContentTemplate="{DataTemplate local:VODDownloader}" Route="VODDownloader" />
+        </Tab>
+        <Tab Title="Clip Downloader">
+            <ShellContent Title="Clip Downloader" ContentTemplate="{DataTemplate local:ClipDownloader}" Route="ClipDownloader" />
+        </Tab>
+    </TabBar>
+
+</Shell>
