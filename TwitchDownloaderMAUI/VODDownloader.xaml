@@ -29,13 +29,117 @@
                 <Label Margin="0,3,3,3" Text="Streamer:" />
                 <Label x:Name="textStreamer" />
             </FlexLayout>
+            <FlexLayout>
+                <Label Margin="0,3,3,3" Text="Created At:" />
+                <Label x:Name="textCreatedAt" />
+            </FlexLayout>
+            <FlexLayout>
+                <Label Margin="0,3,3,3" Text="Title:" />
+                <Label x:Name="textTitle" />
+            </FlexLayout>
         </StackLayout>
 
-        <FlexLayout Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" Margin="0,0,0,10">
-            <Label Margin="3,8,3,3" Text="VOD Link/ID:" />
-            <Entry Keyboard="Url" ReturnType="Go" Margin="3" MinimumWidthRequest="200" WidthRequest="400" IsSpellCheckEnabled="false" IsTextPredictionEnabled="false" />
-            <Button Margin="3" Text="Get Info" />
+        <FlexLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Padding="4" HorizontalOptions="Center">
+            <Label Margin="0,0,3,0" VerticalOptions="Center" Text="VOD Link/ID:" />
+            <Entry Margin="3,0" Keyboard="Url" ReturnType="Go"  MinimumWidthRequest="200" WidthRequest="400" IsSpellCheckEnabled="false" IsTextPredictionEnabled="false" ClearButtonVisibility="WhileEditing" />
+            <Button Margin="3,0,0,0" Text="Get Info" />
         </FlexLayout>
+
+        <Grid Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0">
+            <Grid.RowDefinitions >
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="5" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Row="0" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Length:" />
+            <Label Grid.Row="0" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" x:Name="labelLength" />
+            <Label Grid.Row="2" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Quality:" />
+            <Picker Grid.Row="2" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" />
+
+            <Label Grid.Row="4" Grid.Column="0" Margin="0,0,3,0" Text="Crop Video:" HorizontalOptions="End" VerticalOptions="Center" />
+            <Grid Grid.Row="4" Grid.Column="2" HorizontalOptions="Start">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="150"/>
+                </Grid.ColumnDefinitions>
+                
+                <FlexLayout Grid.Row="0" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" JustifyContent="Start">
+                    <Label Text="Start" VerticalOptions="Center" HorizontalOptions="End" />
+                    <CheckBox VerticalOptions="Center" />
+                </FlexLayout>
+                <FlexLayout Grid.Row="0" Grid.Column="1">
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                </FlexLayout>
+
+                <FlexLayout Grid.Row="1" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="End" VerticalOptions="Center" JustifyContent="Start">
+                    <Label Text="End" VerticalOptions="Center" HorizontalOptions="End" />
+                    <CheckBox VerticalOptions="Center" />
+                </FlexLayout>
+                <FlexLayout Grid.Row="1" Grid.Column="1">
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                    <Entry Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                </FlexLayout>
+            </Grid>
+
+            <Label Grid.Row="6" Grid.Column="0" Text="Download Threads:" HorizontalOptions="End" VerticalOptions="Center" />
+            <FlexLayout Grid.Row="6" Grid.Column="2">
+                <Entry Keyboard="Numeric" Margin="0,0,5,0"/>
+                <Stepper  />
+            </FlexLayout>
+
+            <Label Grid.Row="8" Grid.Column="0" Text="OAuth (optional):" HorizontalOptions="End" VerticalOptions="Center" />
+            <Entry Grid.Row="8" Grid.Column="2" Keyboard="Url" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" ClearButtonVisibility="WhileEditing"/>
+
+        </Grid>
+
+        <FlexLayout Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalOptions="Center" VerticalOptions="End" AlignItems="End" JustifyContent="Center">
+            <Button Text="Download" Margin="0,0,5,0" />
+            <Button Text="Enqueue" />
+            <Button Text="Cancel" IsVisible="false" />
+        </FlexLayout>
+
+        <FlexLayout Grid.Row="1" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End">
+            <ImageButton Source="donate.png" HeightRequest="32" Scale="0.5"/>
+            <ImageButton Source="settings.png" HeightRequest="32" Scale="0.5"/>
+        </FlexLayout>
+
+        <FlexLayout Grid.Row="2" Grid.Column="4"  Direction="Column">
+            <Label HorizontalOptions="Start" Text="Log:" />
+            <Editor IsEnabled="False" MinimumHeightRequest="200" VerticalOptions="Fill" />
+        </FlexLayout>
+
+            <FlexLayout Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalOptions="Start">
+                <Image Margin="0,0,5,0" Source="pphop.gif" IsAnimationPlaying="True" WidthRequest="48" VerticalOptions="Center"/>
+                <Label Text="Idle" FontAttributes="Bold" HorizontalOptions="End" VerticalOptions="Center" />
+            </FlexLayout>
+
+            <FlexLayout Grid.Row="4" Grid.Column="4">
+                <ProgressBar Margin="0,0,5,0" VerticalOptions="Center" Progress="0.5" WidthRequest="200"/>
+            <Label VerticalOptions="Center" Text="50%"/>
+        </FlexLayout>
+
     </Grid>
 
 </ContentPage>

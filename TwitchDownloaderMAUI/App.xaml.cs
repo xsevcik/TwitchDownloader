@@ -1,4 +1,5 @@
-﻿namespace TwitchDownloaderMAUI;
+﻿
+namespace TwitchDownloaderMAUI;
 
 public partial class App : Application
 {
@@ -7,5 +8,16 @@ public partial class App : Application
 		InitializeComponent();
 
 		MainPage = new AppShell();
+	}
+
+	protected override Window CreateWindow(IActivationState? activationState)
+	{
+
+		var window = base.CreateWindow(activationState);
+
+		window.MinimumWidth = 1000;
+		window.MinimumHeight = 600;
+
+		return window;
 	}
 }
