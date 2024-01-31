@@ -61,6 +61,7 @@ namespace TwitchDownloaderCore
             HttpResponseMessage response;
             try
             {
+                token = WebUtility.UrlEncode(token);
                 request = new HttpRequestMessage()
                 {
                     RequestUri = new Uri($"https://usher.ttvnw.net/vod/{videoId}.m3u8?sig={sig}&token={token}&allow_source=true&allow_audio_only=true&platform=web&player_backend=mediaplayer&playlist_include_framerate=true&supported_codecs=av1,h264"),
@@ -97,7 +98,7 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            response.EnsureSuccessStatusCode();
+            //response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadAsStringAsync();
         }
