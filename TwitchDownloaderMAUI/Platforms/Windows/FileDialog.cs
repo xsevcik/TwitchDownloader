@@ -5,7 +5,7 @@ namespace TwitchDownloaderMAUI.Model
 {
     public partial class FileDialog
     {
-        public static async partial Task<string> PromptForFile()
+        public async partial Task<string> PromptForFile()
         {
             var savePicker = new FileSavePicker
             {

@@ -7,9 +7,12 @@ using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderCore.Extensions;
 using System.ComponentModel;
+using TwitchDownloaderMAUI.Model;
+using System.Runtime.Versioning;
 
 namespace TwitchDownloaderMAUI;
 
+[SupportedOSPlatform("MacCatalyst14.0")]
 public partial class VODDownloader : ContentPage
 {
 	public readonly Dictionary<string, (string url, int bandwidth)> videoQualities = [];
@@ -346,8 +349,8 @@ public partial class VODDownloader : ContentPage
 		{
 			return;
 		}*/
-
-		string fileName = await Model.FileDialog.PromptForFile();
+		FileDialog fileDialog = new();
+		string fileName = await fileDialog.PromptForFile();
 
 		if (string.IsNullOrEmpty(fileName)) { return; }
 

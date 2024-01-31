@@ -2,6 +2,6 @@
 {
     public partial class FileDialog
     {
-        public static partial Task<string> PromptForFile();
+        public partial Task<string> PromptForFile();
     }
 }
