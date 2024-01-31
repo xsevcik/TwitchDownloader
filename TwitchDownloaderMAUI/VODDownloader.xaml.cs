@@ -6,7 +6,6 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderCore.Extensions;
-using Microsoft.UI.Xaml;
 using System.ComponentModel;
 
 namespace TwitchDownloaderMAUI;
