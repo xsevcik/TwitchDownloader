@@ -1,14 +1,15 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Extensions;
 using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
-using TwitchDownloaderCore.Extensions;
-using System.ComponentModel;
 using TwitchDownloaderMAUI.Model;
-using System.Runtime.Versioning;
 
 namespace TwitchDownloaderMAUI;
 
@@ -22,7 +23,7 @@ public partial class VODDownloader : ContentPage
 	public int viewCount;
 	public string game;
 	private CancellationTokenSource _cancellationTokenSource;
-	private VODDownloaderViewModel _viewModel;
+	private readonly VODDownloaderViewModel _viewModel;
 
 	public VODDownloader()
 	{
@@ -30,8 +31,6 @@ public partial class VODDownloader : ContentPage
 		_viewModel = (BindingContext as VODDownloaderViewModel) ?? new VODDownloaderViewModel();
 		SetEnabled(false);
 		WebRequest.DefaultWebProxy = null;
-		_viewModel.NumDownloadThreads = Preferences.Default.Get("VodDownloadThreads", 4);
-		textOauth.Text = Preferences.Default.Get("OAuth", "");
 	}
 
 	private void SetEnabled(bool isEnabled)
@@ -50,7 +49,7 @@ public partial class VODDownloader : ContentPage
 		e.Handled = true;*/
 	}
 
-	private async void btnGetInfo_Click(object sender, EventArgs e)
+	private async void BtnGetInfo_Click(object sender, EventArgs e)
 	{
 		await GetVideoInfo();
 	}
@@ -108,9 +107,9 @@ public partial class VODDownloader : ContentPage
 			textStreamer.Text = taskVideoInfo.Result.data.video.owner.displayName;
 			textTitle.Text = taskVideoInfo.Result.data.video.title;
 			var videoCreatedAt = taskVideoInfo.Result.data.video.createdAt;
-			textCreatedAt.Text = Preferences.Default.Get("UTCVideoTime",false) ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
-			currentVideoTime = Preferences.Default.Get("UTCVideoTime",false) ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-			var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(textUrl.Text);
+			textCreatedAt.Text = TDPreferences.UTCVideoTime ? videoCreatedAt.ToString(CultureInfo.CurrentCulture) : videoCreatedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture);
+			currentVideoTime = TDPreferences.UTCVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
+			var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(_viewModel.VODLink);
 			if (urlTimeCodeMatch.Success)
 			{
 				var time = UrlTimeCode.Parse(urlTimeCodeMatch.ValueSpan);
@@ -145,7 +144,7 @@ public partial class VODDownloader : ContentPage
 			btnGetInfo.IsEnabled = true;
 			AppendLog(Translations.Strings.ErrorLog + ex.Message);
 			await DisplayAlert(Translations.Strings.UnableToGetInfo, Translations.Strings.UnableToGetVideoInfo, "Close");
-			if (Preferences.Default.Get("VerboseErrors",false))
+			if (TDPreferences.VerboseErrors)
 			{
 				await DisplayAlert(Translations.Strings.VerboseErrorOutput, ex.ToString(), "Close");
 			}
@@ -164,10 +163,10 @@ public partial class VODDownloader : ContentPage
 		VideoDownloadOptions options = new VideoDownloadOptions
 		{
 			DownloadThreads = _viewModel.NumDownloadThreads,
-			ThrottleKib = Preferences.Default.Get("DownloadThrottleEnabled", false)
-				? Preferences.Default.Get("MaximumBandwidthKib", 4096)
+			ThrottleKib = TDPreferences.ThrottleDownloads
+				? TDPreferences.MaxDownloadSpeedKiB
 				: -1,
-			Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(Preferences.Default.Get("TemplateVod", "[{date_custom=\"M-d-yy\"}] {channel} - {title}"), textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
+			Filename = filename ?? Path.Combine(folder, FilenameService.GetFilename(TDPreferences.VODFilenameTemplate, textTitle.Text, currentVideoId.ToString(), currentVideoTime, textStreamer.Text,
 				checkStart.IsChecked == true ? new TimeSpan(_viewModel.NumStartHour, _viewModel.NumStartMinute, _viewModel.NumStartSecond) : TimeSpan.Zero,
 				checkEnd.IsChecked == true ? new TimeSpan(_viewModel.NumEndHour, _viewModel.NumEndMinute, _viewModel.NumEndSecond) : vodLength,
 				viewCount.ToString(), game) + (((string)comboQuality.SelectedItem).Contains("Audio", StringComparison.OrdinalIgnoreCase) ? ".m4a" : ".mp4")),
@@ -179,7 +178,7 @@ public partial class VODDownloader : ContentPage
 			CropEnding = checkEnd.IsChecked,
 			CropEndingTime = (int)new TimeSpan(_viewModel.NumEndHour, _viewModel.NumEndMinute, _viewModel.NumEndSecond).TotalSeconds,
 			FfmpegPath = "ffmpeg",
-			TempFolder = Preferences.Default.Get("TempPath", "")
+			TempFolder = TDPreferences.TempDataDirectory
 		};
 		return options;
 	}
@@ -229,7 +228,7 @@ public partial class VODDownloader : ContentPage
 		switch (progress.ReportType)
 		{
 			case ReportType.Percent:
-				statusProgressBar.Progress = ((int)progress.Data) / 100.0d;
+				_viewModel.Progress = (int)progress.Data;
 				break;
 			case ReportType.NewLineStatus or ReportType.SameLineStatus:
 				statusMessage.Text = (string)progress.Data;
@@ -315,7 +314,7 @@ public partial class VODDownloader : ContentPage
 
 	private void Page_Loaded(object sender, EventArgs e)
 	{
-		btnDonate.IsVisible = !Preferences.Default.Get("HideDonation", false);
+		btnDonate.IsVisible = !TDPreferences.HideDonationButton;
 	}
 
 	private void checkStart_OnCheckStateChanged(object sender, EventArgs e)
@@ -359,7 +358,7 @@ public partial class VODDownloader : ContentPage
 
 		VideoDownloadOptions options = GetOptions(fileName, null);
 
-		Progress<ProgressReport> downloadProgress = new Progress<ProgressReport>(OnProgressChanged);
+		Progress<ProgressReport> downloadProgress = new(OnProgressChanged);
 		VideoDownloader? currentDownload = new(options, downloadProgress);
 		_cancellationTokenSource = new CancellationTokenSource();
 
@@ -466,36 +465,45 @@ public partial class VODDownloader : ContentPage
 
 public class VODDownloaderViewModel : INotifyPropertyChanged
 {
+	#region Event Management
 	public event PropertyChangedEventHandler? PropertyChanged;
+	public void OnPropertyChanged([CallerMemberName] string propName = "") =>
+		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+	#endregion Event Management
 
+	#region Persistent Properties
 	public int NumDownloadThreads
 	{
-		get
-		{
-			return _numDownloadThreads;
-		}
+		get => TDPreferences.VodDownloadThreads;
 		set
 		{
-			if (_numDownloadThreads == value) { return; }
-			_numDownloadThreads = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumDownloadThreads)));
+			if (value == TDPreferences.VodDownloadThreads) { return; }
+			TDPreferences.VodDownloadThreads = value;
+			OnPropertyChanged();
 		}
 	}
-	private int _numDownloadThreads;
 
+	public string Oauth
+	{
+		get { return TDPreferences.Oauth; }
+		set
+		{
+			if (value == TDPreferences.Oauth) { return; }
+			TDPreferences.Oauth = value;
+			OnPropertyChanged();
+		}
+	}
+	#endregion Persistent Properties
+
+	#region Session Properties
 	public int NumStartHour
 	{
-		get
-		{
-			return _numStartHour;
-		}
+		get => _numStartHour;
 		set
 		{
 			if (_numStartHour == value) { return; }
 			_numStartHour = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumStartHour)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numStartHour;
@@ -509,8 +517,7 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		{
 			if (_numStartMinute == value) { return; }
 			_numStartMinute = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumStartMinute)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numStartMinute;
@@ -524,8 +531,7 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		{
 			if (_numStartSecond == value) { return; }
 			_numStartSecond = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumStartSecond)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numStartSecond;
@@ -540,8 +546,7 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		{
 			if (_numEndHour == value) { return; }
 			_numEndHour = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumEndHour)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numEndHour;
@@ -555,8 +560,7 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		{
 			if (_numEndMinute == value) { return; }
 			_numEndMinute = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumEndMinute)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numEndMinute;
@@ -570,8 +574,7 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		{
 			if (_numEndSecond == value) { return; }
 			_numEndSecond = value;
-
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(NumEndSecond)));
+			OnPropertyChanged();
 		}
 	}
 	private int _numEndSecond;
@@ -586,9 +589,8 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		set
 		{
 			if (_trimStart == value) { return; }
-
 			_trimStart = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrimStart)));
+			OnPropertyChanged();
 		}
 	}
 	private bool _trimStart;
@@ -605,9 +607,8 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		set
 		{
 			if (_trimEnd == value) { return; }
-
 			_trimEnd = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TrimEnd)));
+			OnPropertyChanged();
 		}
 	}
 	private bool _trimEnd;
@@ -619,10 +620,79 @@ public class VODDownloaderViewModel : INotifyPropertyChanged
 		set
 		{
 			if (value == _log) { return; }
-
 			_log = value;
-			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Log)));
+			OnPropertyChanged();
 		}
 	}
 	private string _log = "";
+
+	public int Progress
+	{
+		get { return _progress; }
+		set
+		{
+			if (value == _progress) { return; }
+			_progress = value;
+			OnPropertyChanged();
+			OnPropertyChanged(nameof(ProgressText));
+		}
+	}
+	private int _progress = 0;
+
+	public string ProgressText
+	{
+		get { return Progress.ToString() + "%"; }
+	}
+
+	public string VODLink
+	{
+		get => _vodLink;
+		set
+		{
+			if (value == _vodLink) { return; }
+			_vodLink = value;
+			OnPropertyChanged();
+		}
+	}
+	private string _vodLink = "";
+
+
+	public bool DownloadInProgress
+	{
+		get => _downloadInProgress;
+		set
+		{
+			if (value == _downloadInProgress) { return; }
+			_downloadInProgress = value;
+			OnPropertyChanged();
+		}
+	}
+	private bool _downloadInProgress;
+	#endregion Session Properties
+}
+
+public class PercentToDouble : IValueConverter
+{
+	public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+	{
+		if (value is null) { return 0d; }
+		return (int)value / 100d;
+	}
+
+	public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+	{
+		if (value is null) { return 0; }
+		return (int)((double)value * 100);
+	}
+}
+
+public class Invert : IValueConverter
+{
+	public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+	{
+		return !(bool)(value ?? false);
+	}
+
+	public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+		Convert(value, targetType, parameter, culture);
 }

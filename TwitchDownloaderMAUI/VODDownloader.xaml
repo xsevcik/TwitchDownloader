@@ -8,7 +8,12 @@
         <local:VODDownloaderViewModel />
     </ContentPage.BindingContext>
 
-   <Grid>
+    <ContentPage.Resources>
+        <local:PercentToDouble x:Key="PercentToDouble" />
+        <local:Invert x:Key="Invert" />
+    </ContentPage.Resources>
+
+<Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="30"/>
             <ColumnDefinition Width="*"/>
@@ -25,9 +30,10 @@
             <RowDefinition Height="28"/>
         </Grid.RowDefinitions>
 
+       <!-- Video Details -->
         <StackLayout Margin="0,21,0,0" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
             <Border>
-                <Image x:Name="imgThumbnail" Source="dotnet_bot.png" />
+                <Image x:Name="imgThumbnail" Source="placeholder.png" />
             </Border>
             <FlexLayout>
                 <Label VerticalOptions="Center" HorizontalOptions="Center" x:Name="textTitle" FontAttributes="Bold" />
@@ -40,15 +46,16 @@
                 <Label VerticalOptions="Center" Margin="0,3,3,3" Text="Created At:" />
                 <Label VerticalOptions="Center" x:Name="textCreatedAt" />
             </FlexLayout>
-
         </StackLayout>
 
+       <!-- URL -->
         <FlexLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Padding="4" HorizontalOptions="Center">
             <Label Margin="0,0,3,0" VerticalOptions="Center" Text="VOD Link/ID:" />
             <Entry x:Name="textUrl" Margin="3,0" Keyboard="Url" ReturnType="Go"  MinimumWidthRequest="200" WidthRequest="400" IsSpellCheckEnabled="false" IsTextPredictionEnabled="false" ClearButtonVisibility="WhileEditing" />
-            <Button x:Name="btnGetInfo" Margin="3,0,0,0" Text="Get Info" Clicked="btnGetInfo_Click" />
+            <Button x:Name="btnGetInfo" Margin="3,0,0,0" Text="Get Info" Clicked="BtnGetInfo_Click" />
         </FlexLayout>
 
+       <!-- Download Options -->
         <Grid Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="20">
             <Grid.RowDefinitions >
                 <RowDefinition Height="*" />
@@ -68,11 +75,15 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             
+            <!-- Length -->
             <Label Grid.Row="0" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Length:" />
             <Label Grid.Row="0" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" x:Name="labelLength" />
+            
+            <!-- Quality -->
             <Label Grid.Row="2" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Quality:" />
             <Picker x:Name="comboQuality" Grid.Row="2" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" />
 
+            <!-- Trim -->
             <Label Grid.Row="4" Grid.Column="0" Margin="0,0,3,0" Text="Crop Video:" HorizontalOptions="End" VerticalOptions="Center" />
             <Grid Grid.Row="4" Grid.Column="2" HorizontalOptions="Start">
 
@@ -86,9 +97,10 @@
                     <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 
+                <!-- Start -->
                 <FlexLayout Grid.Row="0" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" JustifyContent="Start">
                     <Label Text="Start" VerticalOptions="Center" HorizontalOptions="End" />
-                    <CheckBox x:Name="checkStart" IsChecked="{Binding TrimStart, Mode=TwoWay}" VerticalOptions="Center" />
+                    <CheckBox x:Name="checkStart" IsChecked="{Binding TrimStart, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
                 </FlexLayout>
                 <FlexLayout Grid.Row="0" Grid.Column="1">
                     <Entry x:Name="fldStartHour" IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
@@ -96,9 +108,10 @@
                     <Entry x:Name="fldStartSecond" IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartSecond, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
                 </FlexLayout>
 
+                <!-- End -->
                 <FlexLayout Grid.Row="1" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="End" VerticalOptions="Center" JustifyContent="Start">
                     <Label Text="End" VerticalOptions="Center" HorizontalOptions="End" />
-                    <CheckBox x:Name="checkEnd" IsChecked="{Binding TrimEnd, Mode=TwoWay}" VerticalOptions="Center" />
+                    <CheckBox x:Name="checkEnd" IsChecked="{Binding TrimEnd, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
                 </FlexLayout>
                 <FlexLayout Grid.Row="1" Grid.Column="1">
                     <Entry x:Name="fldEndHour" IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
@@ -107,43 +120,51 @@
                 </FlexLayout>
             </Grid>
 
+            <!-- Threads -->
             <Label Grid.Row="6" Grid.Column="0" Text="Download Threads:" HorizontalOptions="End" VerticalOptions="Center" />
             <FlexLayout Grid.Row="6" Grid.Column="2">
-                <Entry Text="{Binding NumDownloadThreads, Mode=TwoWay}" IsEnabled="False" Keyboard="Numeric" Margin="0,0,5,0" VerticalOptions="Center" />
-                <Stepper Value="{Binding NumDownloadThreads, Mode=TwoWay}" VerticalOptions="Center" />
+                <Entry Text="{Binding NumDownloadThreads, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Keyboard="Numeric" Margin="0,0,5,0" VerticalOptions="Center" />
+                <Stepper Value="{Binding NumDownloadThreads, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
             </FlexLayout>
 
+            <!-- Oauth -->
             <Label Grid.Row="8" Grid.Column="0" Text="OAuth (optional):" HorizontalOptions="End" VerticalOptions="Center" />
-            <Entry x:Name="textOauth" Grid.Row="8" Grid.Column="2" Keyboard="Url" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" ClearButtonVisibility="WhileEditing"/>
+            <Entry x:Name="textOauth" Grid.Row="8" Grid.Column="2" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Keyboard="Url" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" ClearButtonVisibility="WhileEditing"/>
 
         </Grid>
 
+       <!-- Action Buttons (Download/Enqueue/Cancel) -->
         <FlexLayout Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" HorizontalOptions="Center" VerticalOptions="End" AlignItems="End" JustifyContent="Center" Margin="10">
-            <Button x:Name="btnDownload" Clicked="BtnDownload_Click" Text="Download" Margin="0,0,5,0" />
-            <Button x:Name="btnEnqueue" Text="Enqueue" />
+            <Button x:Name="btnDownload" Clicked="BtnDownload_Click" Text="Download" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Margin="0,0,5,0" />
+            <Button x:Name="btnEnqueue" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Text="Enqueue" />
             <Button x:Name="btnCancel" Clicked="BtnCancel_Click" Text="Cancel" IsVisible="false" />
         </FlexLayout>
 
+       <!-- Donate and Settings -->
         <FlexLayout Grid.Row="1" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" >
             <ImageButton x:Name="btnDonate" Source="donate.png" HeightRequest="32" Scale="0.5"/>
             <ImageButton x:Name="btnSettings" Source="settings.png" HeightRequest="32" Scale="0.5"/>
         </FlexLayout>
 
+       <!-- Log -->
         <FlexLayout Grid.Row="2" Grid.Column="4"  Direction="Column">
             <Label HorizontalOptions="Start" Text="Log:" />
             <Editor x:Name="textLog" Text="{Binding Log}" IsEnabled="False" MinimumHeightRequest="200" VerticalOptions="Fill" />
         </FlexLayout>
 
+       <!-- Status Bar Text and Image -->
         <FlexLayout Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalOptions="Start">
-            <Image x:Name="statusImage" Margin="0,0,5,0" Source="pphop.gif" IsAnimationPlaying="True" WidthRequest="48" VerticalOptions="Center"/>
+            <Image x:Name="statusImage" Margin="0,0,5,0" Source="pphop.gif" IsAnimationPlaying="True" WidthRequest="48" VerticalOptions="Center" Aspect="Fill"/>
             <Label x:Name="statusMessage" Text="Idle" FontAttributes="Bold" HorizontalOptions="End" VerticalOptions="Center" />
          </FlexLayout>
 
+       <!-- Status Bar Progress -->
         <FlexLayout Grid.Row="4" Grid.Column="4" HorizontalOptions="End">
-            <ProgressBar x:Name="statusProgressBar" Margin="0,0,5,0" VerticalOptions="Center" WidthRequest="200"/>
-            <Label VerticalOptions="Center" Text="50%"/>
+            <ProgressBar x:Name="statusProgressBar" Margin="0,0,5,0" VerticalOptions="Center" WidthRequest="200" Progress="{Binding Progress, Converter={StaticResource PercentToDouble}}" />
+            <Label VerticalOptions="Center" Text="{Binding ProgressText}"/>
         </FlexLayout>
 
+       <!-- Status Bar Border -->
         <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="6" />
 
     </Grid>
