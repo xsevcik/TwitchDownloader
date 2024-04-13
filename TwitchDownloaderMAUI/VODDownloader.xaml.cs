@@ -1,7 +1,5 @@
-using Microsoft.Maui.Controls;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -13,7 +11,6 @@ using TwitchDownloaderCore.Options;
 using TwitchDownloaderCore.Tools;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 using TwitchDownloaderMAUI.Model;
-using Windows.ApplicationModel.VoiceCommands;
 
 namespace TwitchDownloaderMAUI;
 
@@ -261,6 +258,8 @@ public partial class VODDownloader : ContentPage
 	}*/
 }
 
+[SupportedOSPlatform("MacCatalyst14.0")]
+[SupportedOSPlatform("Windows")]
 public class VODDownloaderViewModel : INotifyPropertyChanged
 {
 	const string _defaultThumb = "placeholder.png";
