@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:TwitchDownloaderMAUI"
              x:Class="TwitchDownloaderMAUI.VODDownloader"
+             x:DataType="local:VODDownloaderViewModel"
              Title="VOD Downloader">
     <ContentPage.BindingContext>
         <local:VODDownloaderViewModel />
@@ -33,26 +34,26 @@
        <!-- Video Details -->
         <StackLayout Margin="0,21,0,0" Grid.Column="1" Grid.Row="2" Grid.RowSpan="2">
             <Border>
-                <Image x:Name="imgThumbnail" Source="placeholder.png" />
+                <Image Source="{Binding Thumbnail}" />
             </Border>
             <FlexLayout>
-                <Label VerticalOptions="Center" HorizontalOptions="Center" x:Name="textTitle" FontAttributes="Bold" />
+                <Label Text="{Binding Title}" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold" />
             </FlexLayout>
             <FlexLayout>
-                <Label VerticalOptions="Center" Margin="0,3,3,3" Text="Streamer:" />
-                <Label VerticalOptions="Center" x:Name="textStreamer" />
+                <Label Text="Streamer:" VerticalOptions="Center" Margin="0,3,3,3" />
+                <Label Text="{Binding Streamer}" VerticalOptions="Center" />
             </FlexLayout>
             <FlexLayout>
-                <Label VerticalOptions="Center" Margin="0,3,3,3" Text="Created At:" />
-                <Label VerticalOptions="Center" x:Name="textCreatedAt" />
+                <Label Text="Created At:" VerticalOptions="Center" Margin="0,3,3,3" />
+                <Label Text="{Binding CreatedOn}" VerticalOptions="Center" />
             </FlexLayout>
         </StackLayout>
 
        <!-- URL -->
         <FlexLayout Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Padding="4" HorizontalOptions="Center">
             <Label Margin="0,0,3,0" VerticalOptions="Center" Text="VOD Link/ID:" />
-            <Entry x:Name="textUrl" Margin="3,0" Keyboard="Url" ReturnType="Go"  MinimumWidthRequest="200" WidthRequest="400" IsSpellCheckEnabled="false" IsTextPredictionEnabled="false" ClearButtonVisibility="WhileEditing" />
-            <Button x:Name="btnGetInfo" Margin="3,0,0,0" Text="Get Info" Clicked="BtnGetInfo_Click" />
+            <Entry Text="{Binding VODLink, Mode=TwoWay}" ReturnCommand="{Binding CmdGetVideoInfo}" Margin="3,0" Keyboard="Url" ReturnType="Go"  MinimumWidthRequest="200" WidthRequest="400" IsSpellCheckEnabled="false" IsTextPredictionEnabled="false" ClearButtonVisibility="WhileEditing" />
+            <Button Command="{Binding CmdGetVideoInfo}" Margin="3,0,0,0" Text="Get Info" />
         </FlexLayout>
 
        <!-- Download Options -->
@@ -76,16 +77,16 @@
             </Grid.ColumnDefinitions>
             
             <!-- Length -->
-            <Label Grid.Row="0" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Length:" />
-            <Label Grid.Row="0" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" x:Name="labelLength" />
+            <Label Text="Length:" Grid.Row="0" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" />
+            <Label Text="{Binding VODLength}" Grid.Row="0" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" />
             
             <!-- Quality -->
             <Label Grid.Row="2" Grid.Column="0" Margin="0,0,3,0" HorizontalOptions="End" VerticalOptions="Center" Text="Quality:" />
-            <Picker x:Name="comboQuality" Grid.Row="2" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Picker ItemsSource="{Binding Qualities, Mode=TwoWay}" SelectedIndex="{Binding SelectedQualityIndex, Mode=TwoWay}" Grid.Row="2" Grid.Column="2" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" />
 
             <!-- Trim -->
-            <Label Grid.Row="4" Grid.Column="0" Margin="0,0,3,0" Text="Crop Video:" HorizontalOptions="End" VerticalOptions="Center" />
-            <Grid Grid.Row="4" Grid.Column="2" HorizontalOptions="Start">
+            <Label Grid.Row="4" Grid.Column="0" Margin="0,0,3,0" Text="Trim Video:" HorizontalOptions="End" VerticalOptions="Center" />
+            <Grid Grid.Row="4" Grid.Column="2" HorizontalOptions="Fill">
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -93,30 +94,30 @@
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="150"/>
                 </Grid.ColumnDefinitions>
                 
                 <!-- Start -->
-                <FlexLayout Grid.Row="0" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" JustifyContent="Start">
+                <FlexLayout Grid.Row="0" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" JustifyContent="End" WidthRequest="64">
                     <Label Text="Start" VerticalOptions="Center" HorizontalOptions="End" />
-                    <CheckBox x:Name="checkStart" IsChecked="{Binding TrimStart, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
+                    <CheckBox IsChecked="{Binding TrimStart, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
                 </FlexLayout>
-                <FlexLayout Grid.Row="0" Grid.Column="1">
-                    <Entry x:Name="fldStartHour" IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
-                    <Entry x:Name="fldStartMinute" IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartMinute, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
-                    <Entry x:Name="fldStartSecond" IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartSecond, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                <FlexLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="Start">
+                    <Entry IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done"  />
+                    <Entry IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartMinute, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done"  />
+                    <Entry IsEnabled="{Binding TrimStart, Mode=TwoWay}" Text="{Binding NumStartSecond, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" />
                 </FlexLayout>
 
                 <!-- End -->
-                <FlexLayout Grid.Row="1" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="End" VerticalOptions="Center" JustifyContent="Start">
+                <FlexLayout Grid.Row="1" Grid.Column="0" Margin="3,0,0,0" HorizontalOptions="Start" VerticalOptions="Center" JustifyContent="End" WidthRequest="64">
                     <Label Text="End" VerticalOptions="Center" HorizontalOptions="End" />
-                    <CheckBox x:Name="checkEnd" IsChecked="{Binding TrimEnd, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
+                    <CheckBox IsChecked="{Binding TrimEnd, Mode=TwoWay}" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" VerticalOptions="Center" />
                 </FlexLayout>
-                <FlexLayout Grid.Row="1" Grid.Column="1">
-                    <Entry x:Name="fldEndHour" IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
-                    <Entry x:Name="fldEndMinute" IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndMinute, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
-                    <Entry x:Name="fldEndSecond" IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndSecond, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" WidthRequest="50" />
+                <FlexLayout Grid.Row="1" Grid.Column="1" HorizontalOptions="Start">
+                    <Entry IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndHour, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" />
+                    <Entry IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndMinute, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" />
+                    <Entry IsEnabled="{Binding TrimEnd, Mode=TwoWay}" Text="{Binding NumEndSecond, Mode=TwoWay}" Keyboard="Numeric" ReturnType="Done" />
                 </FlexLayout>
             </Grid>
 
@@ -129,7 +130,7 @@
 
             <!-- Oauth -->
             <Label Grid.Row="8" Grid.Column="0" Text="OAuth (optional):" HorizontalOptions="End" VerticalOptions="Center" />
-            <Entry x:Name="textOauth" Grid.Row="8" Grid.Column="2" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Keyboard="Url" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" ClearButtonVisibility="WhileEditing"/>
+            <Entry x:Name="textOauth" Text="{Binding Oauth}" Grid.Row="8" Grid.Column="2" IsEnabled="{Binding DownloadInProgress, Converter={StaticResource Invert}}" Keyboard="Url" IsSpellCheckEnabled="False" IsTextPredictionEnabled="False" ClearButtonVisibility="WhileEditing"/>
 
         </Grid>
 
@@ -142,8 +143,8 @@
 
        <!-- Donate and Settings -->
         <FlexLayout Grid.Row="1" Grid.Column="4" VerticalOptions="Center" HorizontalOptions="End" >
-            <ImageButton x:Name="btnDonate" Source="donate.png" HeightRequest="32" Scale="0.5"/>
-            <ImageButton x:Name="btnSettings" Source="settings.png" HeightRequest="32" Scale="0.5"/>
+            <ImageButton Command="{Binding CmdOpenDonatePage}" IsVisible="{Binding HideDonationButton, Converter={StaticResource Invert}}"  Source="donate.png" HeightRequest="24" />
+            <ImageButton Command="{Binding CmdOpenSettings}" Source="settings.png" HeightRequest="24" />
         </FlexLayout>
 
        <!-- Log -->

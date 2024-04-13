@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TwitchDownloaderMAUI.GlobalSettings"
+             Title="GlobalSettings">
+    <VerticalStackLayout HorizontalOptions="Center">
+        <FlexLayout>
+            <Label Text="Cache Folder:" VerticalOptions="Center"/>
+            <Button Text="Clear" VerticalOptions="Center" />
+            <Button Text="Browse..." VerticalOptions="Center" />
+            <Entry VerticalOptions="Center" />
+        </FlexLayout>
+        <Button Text="Done" Clicked="BtnDone_Clicked" HorizontalOptions="End" VerticalOptions="End" />
+    </VerticalStackLayout>
+    
+</ContentPage>
